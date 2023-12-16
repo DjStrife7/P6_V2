@@ -74,18 +74,21 @@ exports.modifyOne = (req, res, next) => {
           message: 'Non-autorisé'
         });
       } else {
-        modelSauce.updateOne({ _id: req.params.id}, { ...sauceObject, _id: req.params.id })
-          .then(() => {
-            res.status(200).json({
-              message: 'Sauce modifiée !'
-            });
-          })
-          .catch(error => {
-            res.status(401).json({
-              error
-            })
+        const filename = sauce.imageUrl.split('/images/')[1];
+          fs.unlink(`images/${filename}`, () => {
+            modelSauce.updateOne({ _id: req.params.id}, { ...sauceObject, _id: req.params.id })
+              .then(() => {
+                res.status(200).json({
+                  message: 'Sauce modifiée !'
+                });
+              })
+              .catch(error => {
+                res.status(401).json({
+                  error
+                })
+              });  
           });
-      }
+        }
     })
     .catch((error) => {
       res.status(400).json({
