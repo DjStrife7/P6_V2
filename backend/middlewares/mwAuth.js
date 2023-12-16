@@ -1,4 +1,3 @@
-// On importe le package jsonWebToken
 const jwt = require('jsonwebtoken');
 
 // On prépare une fonction qui sera le middleware
@@ -10,17 +9,16 @@ module.exports = (req, res, next) => {
     const decodedToken = jwt.verify(token, process.env.RANDOM_TOKEN_KEY);
     // On récupère le userId du token décodé
     const userId = decodedToken.userId;
-    // console.log('token :' + token);
-    // console.log('userId :' + userId);
+
     req.auth = {
       userId: userId,
     };
-    // console.log(req.auth.userId);
     next();
   } 
   
   catch(error) {
-    // console.log(error);
-    res.status(401).json({ error })
+    res.status(401).json({ 
+      error
+    })
   }
 };

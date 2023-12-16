@@ -1,4 +1,3 @@
-// On importe le package Bcrypt & JsonWebToken qui va nous servir à l'encryptage des mot de passe utilisateurs
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const maskData = require('maskdata');
@@ -18,7 +17,7 @@ const emailMasked2Options = {
 
 // Création de fonction pour la création de nouveaux utilisateurs
 exports.signup = (req, res, next) => {
-    // On commence par encrypter le mot passe car ceci est une fonction asynchrone et est longue
+  // On commence par encrypter le mot passe car ceci est une fonction asynchrone et est longue
   // On récupère le mot de passe du frontend et on fait 10 passes pour l'encryptage 
   bcrypt.hash(req.body.password, 10)
     .then(hash => {
@@ -40,7 +39,6 @@ exports.signup = (req, res, next) => {
       });
     })
     .catch(error => {
-      // On affiche une erreur serveur via le code 500
       res.status(500).json({
         error
       })

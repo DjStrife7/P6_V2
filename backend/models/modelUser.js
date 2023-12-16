@@ -1,4 +1,3 @@
-// On importe les packages Express et Mongoose-unique-validator dans notre fichier via les const suivantes
 const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
 

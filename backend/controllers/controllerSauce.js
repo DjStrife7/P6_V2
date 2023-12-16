@@ -43,8 +43,6 @@ exports.createOne = (req, res, next) => {
     usersLiked: [],
     usersDisliked: []
   });
-  // console.log('infoProduct :' + sauce);
-  // console.log('imageURL :' + `${req.protocol}://${req.get('host')}/images/${req.file.filename}`);
 
   sauce.save()
     .then(() => {

@@ -1,4 +1,3 @@
-// On importe le package multer
 const multer = require('multer');
 
 

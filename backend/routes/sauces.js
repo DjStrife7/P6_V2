@@ -1,4 +1,3 @@
-// On importe les packages dans notre fichier via les const suivantes
 const express = require('express');
 
 const routerSauce = express.Router();

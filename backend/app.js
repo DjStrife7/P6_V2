@@ -1,13 +1,13 @@
-// On importe les packages Express, Mongoose et CORS dans notre fichier app via les const suivantes
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-// On importe les variables d'environnement du fichier .env
 const dotenv = require('dotenv').config();
+
 // On importe les routes créées pour les éléments d'authentification et de sauces
 const modelRouteAuth = require('./routes/auth');
 const modelRouteSauce = require('./routes/sauces');
-// On importe une nouvelle const pour accèder au path du serveur
+
 const path = require('path');
 
 // On crée une constante qui nous permet de créer une application Express

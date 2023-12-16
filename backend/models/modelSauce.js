@@ -1,4 +1,3 @@
-// On importe les packages dans notre fichier via les const suivantes
 const mongoose = require('mongoose');
 
 const sauceSchema = mongoose.Schema({
