@@ -5,7 +5,7 @@ const app = require('./app');
 const MY_PORT = process.env.PORT;
 
 
-app.set('port', MY_PORT || 3000);
+app.set('port', MY_PORT);
 const server = http.createServer(app);
 
 server.listen(MY_PORT, () => {

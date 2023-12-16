@@ -4,8 +4,8 @@ const express = require('express');
 const routerSauce = express.Router();
 
 // On importe le middleware que nous avons réalisé
-const mwAuth = require('../middleware/mwAuth');
-const multer = require('../middleware/multerConfig');
+const mwAuth = require('../middlewares/mwAuth');
+const multer = require('../middlewares/multerConfig');
 
 const sauceCtrl = require('../controllers/controllerSauce');
 
