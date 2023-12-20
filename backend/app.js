@@ -18,8 +18,8 @@ const app = express();
 mongoose.connect(process.env.DB_URL,
 { useNewUrlParser: true,
   useUnifiedTopology: true })
-.then(() => console.log('Connexion à MongoDB Atlas réussie !'))
-.catch(() => console.log('Connexion à MongoDB Atlas échouée !'));
+  .then(() => console.log('Connexion à MongoDB Atlas réussie !'))
+  .catch(() => console.log('Connexion à MongoDB Atlas échouée !'));
 
 app.use(express.json());
 

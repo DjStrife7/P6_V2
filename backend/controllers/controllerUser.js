@@ -1,15 +1,15 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const maskData = require('maskdata');
+const httpStatusCode = require('http-status-codes');
 
-// On importe le modèle user afin de lire et enregistrer des utilisateurs dans ces middlewares
 const User = require('../models/modelUser');
 
 
 // On crée une const pour masquer l'adresse email
 const emailMasked2Options = {
   maskWith: "*",
-  unmaskedStartCharactersBeforeAt: 3,
+  unmaskedStartCharactersBeforeAt: 2,
   unmaskedStartCharactersAfterAt: 2,
   maskAtTheRate: false
 };
@@ -25,21 +25,21 @@ exports.signup = (req, res, next) => {
         email: maskData.maskEmail2(req.body.email, emailMasked2Options),
         password: hash
       });
-      // On enregistre l'utilisateur dans la base de donnée
+      
       user.save()
       .then(() => {
-        res.status(201).json({
+        return res.status(httpStatusCode.CREATED).json({
           message: 'Utilisateur enregistré !'
         })
       })
       .catch(error => {
-        res.status(400).json({
+        return res.status(httpStatusCode.BAD_REQUEST).json({
           error: "Erreur d'enregistrement !"
         })
       });
     })
     .catch(error => {
-      res.status(500).json({
+      return res.status(httpStatusCode.INTERNAL_SERVER_ERROR).json({
         error
       })
     });
@@ -52,7 +52,7 @@ exports.login = (req, res, next) => {
       // On vérifie si l'utilisateur existe dans la base de donnée
       if (User === null) {
         // Si l'utilisateur n'existe pas alors on renvoi une erreur vague pour éviter d'informer les personnes malveillantes de récupérer des informations
-        res.status(401).json({
+        return res.status(httpStatusCode.FORBIDDEN).json({
           message: 'Paire identifiant/mot de passe incorrect'
         })
       } else {
@@ -61,12 +61,12 @@ exports.login = (req, res, next) => {
           .then(valid => {
             // Si le mot de passe n'est pas bon, alors on renvoi la même erreur que précèdemment
             if (!valid) {
-              res.status(401).json({
+              return res.status(httpStatusCode.FORBIDDEN).json({
                 message: 'Paire identifiant/mot de passe incorrect'
               })
             } else {
               // On retourne un objet qui va servir à l'authentification des requêtes
-              res.status(200).json({
+              return res.status(httpStatusCode.OK).json({
                 userId: User._id,
                 token: jwt.sign(
                   // On importe une fonction JsonWebToken avec les arguments suivants (payload)
@@ -80,14 +80,14 @@ exports.login = (req, res, next) => {
             }
           })
           .catch(error => {
-            res.status(500).json({
+            return res.status(httpStatusCode.INTERNAL_SERVER_ERROR).json({
               error
             })
           });
       }
     })
     .catch(error => {
-      res.status(500).json({
+      return res.status(httpStatusCode.INTERNAL_SERVER_ERROR).json({
         error
       })
     });
