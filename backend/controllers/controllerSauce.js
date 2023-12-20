@@ -137,7 +137,7 @@ exports.likeOne = (req, res, next) => {
     modelSauce.findOne({ _id: req.params.id })
     .then((sauce) => {
       // On regarde tout d'abord si l'utilisateur n'a pas déjà like ou dislike la sauce
-      if(modelSauce.usersLiked.includes(req.body.userId) || modelSauce.usersDisliked.includes(req.body.userId)) {
+      if(sauce.usersLiked.includes(req.body.userId) || sauce.usersDisliked.includes(req.body.userId)) {
         res.status(httpStatusCode.UNAUTHORIZED).json({
           message: 'Opération non valide !'
         });
@@ -172,7 +172,7 @@ exports.likeOne = (req, res, next) => {
     modelSauce.findOne({ _id: req.params.id })
     .then((sauce) => {
       // On regarde tout d'abord si l'utilisateur n'a pas déjà like ou dislike la sauce
-      if(modelSauce.usersLiked.includes(req.body.userId) || modelSauce.usersDisliked.includes(req.body.userId)) {
+      if(sauce.usersLiked.includes(req.body.userId) || sauce.usersDisliked.includes(req.body.userId)) {
         res.status(httpStatusCode.UNAUTHORIZED).json({
           message: 'Opération non valide !'
         });
@@ -207,7 +207,7 @@ exports.likeOne = (req, res, next) => {
     modelSauce.findOne({ _id: req.params.id })
     .then((sauce) => {
       // On regarde tout d'abord si l'utilisateur est dans le tableau des like de la sauce
-      if(modelSauce.usersLiked.includes(req.body.userId)) {
+      if(sauce.usersLiked.includes(req.body.userId)) {
         modelSauce.updateOne({ _id: req.params.id }, {
           // Du coup, on pull le userId du le tableau userLiked de la sauce
           $pull: { usersLiked: req.body.userId },
@@ -226,7 +226,7 @@ exports.likeOne = (req, res, next) => {
         });
       };
       // On regarde tout d'abord si l'utilisateur est dans le tableau des dislike de la sauce
-      if(modelSauce.usersDisliked.includes(req.body.userId)) {
+      if(sauce.usersDisliked.includes(req.body.userId)) {
         modelSauce.updateOne({ _id: req.params.id }, {
           // Du coup, on pull le userId du le tableau userDisliked de la sauce
           $pull: { usersDisliked: req.body.userId },
