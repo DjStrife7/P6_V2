@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const httpStatusCode = require('http-status-codes');
 
 // On prépare une fonction qui sera le middleware
 module.exports = (req, res, next) => {
@@ -17,7 +18,7 @@ module.exports = (req, res, next) => {
   } 
   
   catch(error) {
-    return res.status(401).json({ 
+    return res.status(httpStatusCode.UNAUTHORIZED).json({ 
       error
     })
   }

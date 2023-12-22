@@ -136,30 +136,17 @@ exports.likeOne = (req, res, next) => {
   if(like === 1) {
     modelSauce.findOne({ _id: req.params.id })
     .then((sauce) => {
-      // On regarde tout d'abord si l'utilisateur n'a pas déjà like ou dislike la sauce
-      if(sauce.usersLiked.includes(req.body.userId) || sauce.usersDisliked.includes(req.body.userId)) {
+      if(sauce.usersLiked.includes(req.body.userId)) {
         res.status(httpStatusCode.UNAUTHORIZED).json({
           message: 'Opération non valide !'
         });
       } else {
-        modelSauce.updateOne({ _id: req.params.id }, {
-          // Du coup, on push le userId dans le tableau userLiked de la sauce
-          $push: { usersLiked: req.body.userId },
-          // Et on ajoute le like dans le compteur de la sauce
-          $inc: { likes: +1 },
-        })
-        .then(() => {
-          res.status(httpStatusCode.OK).json({
-            message: 'Vous aimez cette sauce !'
-          })
-        })
-        .catch(error => {
-          res.status(httpStatusCode.BAD_REQUEST).json({
-            error
-          })
-        });
+        if(sauce.usersDisliked.includes(req.body.userId)) {
+          pullDislike(req.params.id, req.body.userId, res);
+        } else {
+          pushLike(req.params.id, req.body.userId, res);
+        }
       }
-
     })
     .catch((error) => {
       return res.status(httpStatusCode.INTERNAL_SERVER_ERROR).json({
@@ -167,32 +154,21 @@ exports.likeOne = (req, res, next) => {
       })
     });
   };
+
   // Ajout d'un dislike
   if(like === -1) {
     modelSauce.findOne({ _id: req.params.id })
     .then((sauce) => {
-      // On regarde tout d'abord si l'utilisateur n'a pas déjà like ou dislike la sauce
-      if(sauce.usersLiked.includes(req.body.userId) || sauce.usersDisliked.includes(req.body.userId)) {
+      if(sauce.usersDisliked.includes(req.body.userId)) {
         res.status(httpStatusCode.UNAUTHORIZED).json({
           message: 'Opération non valide !'
         });
       } else {
-        modelSauce.updateOne({ _id: req.params.id }, {
-          // Du coup, on push le userId dans le tableau userDisliked de la sauce
-          $push: { usersDisliked: req.body.userId },
-          // Et on ajoute le dislike dans le compteur de la sauce
-          $inc: { dislikes: +1 },
-        })
-        .then(() => {
-          res.status(httpStatusCode.OK).json({
-            message: "Vous n'avez pas aimez cette sauce !"
-          })
-        })
-        .catch(error => {
-          res.status(httpStatusCode.BAD_REQUEST).json({
-            error
-          });
-        })
+        if(sauce.usersLiked.includes(req.body.userId)) {
+          pullLike(req.params.id, req.body.userId, res);
+        } else {
+          pushDislike(req.params.id, req.body.userId, res);
+        }
       }
 
     })
@@ -202,48 +178,17 @@ exports.likeOne = (req, res, next) => {
       })
     });
   };
+
   // Suppression de l'avis
   if(like === 0) {
     modelSauce.findOne({ _id: req.params.id })
     .then((sauce) => {
-      // On regarde tout d'abord si l'utilisateur est dans le tableau des like de la sauce
       if(sauce.usersLiked.includes(req.body.userId)) {
-        modelSauce.updateOne({ _id: req.params.id }, {
-          // Du coup, on pull le userId du le tableau userLiked de la sauce
-          $pull: { usersLiked: req.body.userId },
-          // Et on retire le like dans le compteur de la sauce
-          $inc: { likes: -1 },
-        })
-        .then(() => {
-          res.status(httpStatusCode.OK).json({
-            message: "Votre avis a été retiré !"
-          })
-        })
-        .catch(error => {
-          res.status(httpStatusCode.BAD_REQUEST).json({
-            error
-          })
-        });
+        pullLike(req.params.id, req.body.userId, res);
       };
-      // On regarde tout d'abord si l'utilisateur est dans le tableau des dislike de la sauce
       if(sauce.usersDisliked.includes(req.body.userId)) {
-        modelSauce.updateOne({ _id: req.params.id }, {
-          // Du coup, on pull le userId du le tableau userDisliked de la sauce
-          $pull: { usersDisliked: req.body.userId },
-          // Et on retire le dislike dans le compteur de la sauce
-          $inc: { dislikes: -1 },
-        })
-        .then(() => {
-          res.status(httpStatusCode.OK).json({
-            message: "Votre avis a été retiré !"
-          })
-        })
-        .catch(error => {
-          res.status(httpStatusCode.BAD_REQUEST).json({
-            error
-          });
-        })
-      };
+        pullDislike(req.params.id, req.body.userId, res);
+      }
     })
     .catch((error) => {
       return res.status(httpStatusCode.INTERNAL_SERVER_ERROR).json({
@@ -251,4 +196,75 @@ exports.likeOne = (req, res, next) => {
       })
     });
   };
+};
+
+
+
+// Création dess fonctions pour PUSH ou PULL sur la DB les informations de like ou de dislike
+function pushLike(productId, userId, res) {
+  modelSauce.updateOne({ _id: productId }, {
+    $push: { usersLiked: userId },
+    $inc: { likes: +1 },
+  })
+  .then(() => {
+    res.status(httpStatusCode.OK).json({
+      message: 'Votre like a été ajouté pour cette sauce !'
+    })
+  })
+  .catch(error => {
+    res.status(httpStatusCode.BAD_REQUEST).json({
+      error
+    })
+  });
+};
+
+function pullLike(productId, userId, res) {
+  modelSauce.updateOne({ _id: productId }, {
+    $pull: { usersLiked: userId },
+    $inc: { likes: -1 },
+  })
+  .then(() => {
+    res.status(httpStatusCode.OK).json({
+      message: 'Vous like a été supprimé pour cette sauce !'
+    })
+  })
+  .catch(error => {
+    res.status(httpStatusCode.BAD_REQUEST).json({
+      error
+    })
+  });
+};
+
+function pushDislike(productId, userId, res) {
+  modelSauce.updateOne({ _id: productId }, {
+    $push: { usersDisliked: userId },
+    $inc: { dislikes: +1 },
+  })
+  .then(() => {
+    res.status(httpStatusCode.OK).json({
+      message: "Votre dislike a été ajouté pour cette sauce !"
+    })
+  })
+  .catch(error => {
+    res.status(httpStatusCode.BAD_REQUEST).json({
+      error
+    });
+  })
+};
+
+function pullDislike(productId, userId, res) {
+  modelSauce.updateOne({ _id: productId }, {
+    $pull: { usersDisliked: userId },
+    $inc: { dislikes: -1 },
+  })
+  .then(() => {
+    res.status(httpStatusCode.OK).json({
+      message: "Votre dislike a été supprimé pour cette sauce !"
+    })
+  })
+  .catch(error => {
+    res.status(httpStatusCode.BAD_REQUEST).json({
+      error
+    });
+  })
 };
