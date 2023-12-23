@@ -38,7 +38,7 @@ exports.createOne = (req, res, next) => {
   const sauce = new modelSauce({
     ...sauceObject,
     userId: req.auth.userId,
-    imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
+    imageUrl: imageUrlLocation(req.protocol, req.get('host')) + `/${req.file.filename}`,
     likes: 0,
     dislikes: 0,
     usersLiked: [],
@@ -62,7 +62,7 @@ exports.createOne = (req, res, next) => {
 exports.modifyOne = (req, res, next) => {
   const sauceObject = req.file ? {
     ...JSON.parse(req.body.sauce),
-    imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+    imageUrl: imageUrlLocation(req.protocol, req.get('host')) + `/${req.file.filename}`
   } : { ...req.body };
 
   delete sauceObject._userId;
@@ -200,6 +200,7 @@ exports.likeOne = (req, res, next) => {
 
 
 
+
 // Création dess fonctions pour PUSH ou PULL sur la DB les informations de like ou de dislike
 function pushLike(productId, userId, res) {
   modelSauce.updateOne({ _id: productId }, {
@@ -268,3 +269,11 @@ function pullDislike(productId, userId, res) {
     });
   })
 };
+
+// Création d'une fonction pour l'URL de l'image
+function imageUrlLocation(protocolHttp, hostName) {
+  let baseUrl = `${protocolHttp}://${hostName}`;
+  let imgLocation = '/images';
+
+  return completeUrl = baseUrl + imgLocation;
+}
