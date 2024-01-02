@@ -1,85 +1,93 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const maskData = require('maskdata');
+const cryptoJs = require('crypto-js');
 const httpStatusCode = require('http-status-codes');
 
 const User = require('../models/modelUser');
 
 
-// On crée une const pour masquer l'adresse email
-const emailMasked2Options = {
-  maskWith: "*",
-  unmaskedStartCharactersBeforeAt: 2,
-  unmaskedStartCharactersAfterAt: 2,
-  maskAtTheRate: false
-};
-
-
-// Création de fonction pour la création de nouveaux utilisateurs
+// Creation of function for the creation of new users
 exports.signup = (req, res, next) => {
-  // On commence par encrypter le mot passe car ceci est une fonction asynchrone et est longue
-  // On récupère le mot de passe du frontend et on fait 10 passes pour l'encryptage 
+  // Creating user email encryption
+  const emailCrypt = cryptoJs
+    .HmacSHA256(req.body.email, process.env.SECRET_KEY)
+    .toString();
+
+  // We start by encrypting the password because this is an asynchronous function and is long.
+  // We retrieve the frontend password and do 10 passes for encryption
   bcrypt.hash(req.body.password, 10)
     .then(hash => {
       const user = new User({
-        email: maskData.maskEmail2(req.body.email, emailMasked2Options),
+        email: emailCrypt,
         password: hash
       });
       
       user.save()
       .then(() => {
+        console.log('Utilisateur enregistré!');
         return res.status(httpStatusCode.CREATED).json({
-          message: 'Utilisateur enregistré !'
+          message: 'Compte crée avec succès !'
         })
       })
       .catch(error => {
+        console.log("Création de compte impossible");
         return res.status(httpStatusCode.BAD_REQUEST).json({
-          error: "Erreur d'enregistrement !"
+          error: "Création de compte impossible !"
         })
       });
     })
     .catch(error => {
+      console.log("Erreur serveur lors de l'enregistrement !");
       return res.status(httpStatusCode.INTERNAL_SERVER_ERROR).json({
-        error
+        error : "Erreur serveur lors de l'enregistrement !"
       })
     });
 };
 
-// Création de la fonction pour la connexion des utilisateurs existants dans la base de donnée
+// Creation of the function for connecting existing users to the database
 exports.login = (req, res, next) => {
-  User.findOne({ email: maskData.maskEmail2(req.body.email, emailMasked2Options) })
+  const emailCrypt = cryptoJs
+    .HmacSHA256(req.body.email, process.env.SECRET_KEY)
+    .toString();
+
+
+  User.findOne({ email: emailCrypt })
     .then(User => {
-      // On vérifie si l'utilisateur existe dans la base de donnée
+      // We check if the user exists in the database
       if (User === null) {
-        // Si l'utilisateur n'existe pas alors on renvoi une erreur vague pour éviter d'informer les personnes malveillantes de récupérer des informations
-        return res.status(httpStatusCode.FORBIDDEN).json({
+        console.log('Paire identifiant/mot de passe incorrect');
+        // If the user does not exist then we return a vague error to avoid informing malicious people to retrieve information
+        return res.status(httpStatusCode.UNAUTHORIZED).json({
           message: 'Paire identifiant/mot de passe incorrect'
         })
       } else {
-        // Si l'utilisateur existe dans la base de donnée alors on va comparer le mot de passe avec celui dans la base de donnée
+        // If the user exists in the database then we will compare the password with that in the database
         bcrypt.compare(req.body.password, User.password)
           .then(valid => {
-            // Si le mot de passe n'est pas bon, alors on renvoi la même erreur que précèdemment
+            // If the password is not good, then we return the same error as before
             if (!valid) {
-              return res.status(httpStatusCode.FORBIDDEN).json({
+              console.log('Paire identifiant/mot de passe incorrect');
+              return res.status(httpStatusCode.UNAUTHORIZED).json({
                 message: 'Paire identifiant/mot de passe incorrect'
               })
             } else {
-              // On retourne un objet qui va servir à l'authentification des requêtes
+              console.log('Authentification réussie !');
+              // We return an object which will be used for request authentication
               return res.status(httpStatusCode.OK).json({
                 userId: User._id,
                 token: jwt.sign(
-                  // On importe une fonction JsonWebToken avec les arguments suivants (payload)
+                  // We import a JsonWebToken function with the following arguments (payload)
                   { userId: User._id },
-                  // Clé secrète pour l'encodage
+                  // Secret key for encoding
                   process.env.RANDOM_TOKEN_KEY,
-                  // Un argument de configuration, un délai d'expiration du token
+                  // A configuration argument, a token expiration time
                   { expiresIn: '24h' }
                 )
               });
             }
           })
           .catch(error => {
+            console.log('Erreur serveur lors de la connexion !');
             return res.status(httpStatusCode.INTERNAL_SERVER_ERROR).json({
               error
             })
@@ -87,6 +95,7 @@ exports.login = (req, res, next) => {
       }
     })
     .catch(error => {
+      console.log('Erreur serveur lors de la connexion !');
       return res.status(httpStatusCode.INTERNAL_SERVER_ERROR).json({
         error
       })

@@ -1,4 +1,4 @@
-// On importe le package HTTP de node qui nous permet de créer le serveur et notre fichier app
+// We import the HTTP package from node which allows us to create the server and our app file
 const http = require('http');
 const app = require('./app');
 

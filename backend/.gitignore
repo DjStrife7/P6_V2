@@ -23,6 +23,5 @@ $RECYCLE.BIN/
 
 
 # Eléments du projet
-/images
 /node_modules
 .env

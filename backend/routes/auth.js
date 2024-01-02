@@ -4,8 +4,9 @@ const routerAuth = express.Router();
 
 
 const userCtrl = require('../controllers/controllerUser');
+const passwordChecker = require('../middlewares/passwordChecker');
 
-routerAuth.post('/signup', userCtrl.signup);
+routerAuth.post('/signup', passwordChecker, userCtrl.signup);
 routerAuth.post('/login', userCtrl.login);
 
 module.exports = routerAuth;
