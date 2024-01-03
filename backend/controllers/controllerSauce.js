@@ -323,5 +323,5 @@ function imageUrlLocation(protocolHttp, hostName) {
   const baseUrl = `${protocolHttp}://${hostName}`;
   const imgLocation = '/images';
 
-  return completeUrl = baseUrl + imgLocation;
+  return baseUrl + imgLocation;
 }

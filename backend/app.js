@@ -3,12 +3,11 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv').config();
+const path = require('path');
 
 // We import the routes created for the authentication and sauce elements
 const modelRouteAuth = require('./routes/auth');
 const modelRouteSauce = require('./routes/sauces');
-
-const path = require('path');
 
 // We create a constant which allows us to create an Express application
 const app = express();
